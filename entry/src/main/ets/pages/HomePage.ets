@@ -175,8 +175,8 @@ struct HomePage {
       case Symbol.SQRT:
         // Handle square root as a special operator
         this.inputOperators(len, value);
-        // Calculate result immediately for square root
-        this.getResult();
+        // 不要立即计算结果，因为根号后面可能还有数字
+        // 等待用户输入数字后再计算
         break;
       default:
         this.inputOperators(len, value);
@@ -202,13 +202,17 @@ struct HomePage {
     }
     if (!last) {
       this.expressions.push(value);
+    } else if (last === CommonConstants.SQRT) {
+      // 如果上一个是根号，推入新数字
+      this.expressions.push(value);
     } else if (!secondLast) {
       this.expressions[len - 1] += value;
-    }
-    if (secondLast && CalculateUtil.isSymbol(secondLast)) {
-      this.expressions[len -1] += value;
-    }
-    if (secondLast && !CalculateUtil.isSymbol(secondLast)) {
+    } else if (secondLast && CalculateUtil.isSymbol(secondLast)) {
+      // 只有当last不是根号时才追加数字
+      if (last !== CommonConstants.SQRT) {
+        this.expressions[len - 1] += value;
+      }
+    } else if (secondLast && !CalculateUtil.isSymbol(secondLast)) {
       this.expressions.push(value);
     }
     this.formatInputValue();
@@ -283,16 +287,17 @@ struct HomePage {
     
     // Handle square root operator (unary operator)
     if (value === Symbol.SQRT) {
-      // For square root, we can apply it to the last number or as a standalone operator
       if (last && !CalculateUtil.isSymbol(last)) {
-        // Apply square root to the last number
+        // 如果前面有数字，如 9√2，需要添加乘号：9 × √2
+        // 先添加乘号
+        this.expressions.push(CommonConstants.MUL);
+        // 再添加根号
         this.expressions.push(CommonConstants.SQRT);
-        this.expressions.push(last);
-        this.expressions.splice(this.expressions.length - 3, 1); // Remove the original number
       } else {
-        // Just add square root operator, it will wait for a number
+        // 否则直接添加根号
         this.expressions.push(CommonConstants.SQRT);
       }
+      // 不要直接return，让调用者继续执行formatInputValue和getResult
       return;
     }
     
@@ -390,7 +395,7 @@ struct HomePage {
    * @return Thousand percentile data.
    */
   resultFormat(value: string) {
-    let reg = (value.indexOf('.') > -1) ? new RegExp("/(\d)(?=(\d{3})+\.)/g") : new RegExp("/(\d)(?=(?:\d{3})+$)/g");
+    let reg = (value.indexOf('.') > -1) ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g;
     return value.replace(reg, '$1,');
   }
 

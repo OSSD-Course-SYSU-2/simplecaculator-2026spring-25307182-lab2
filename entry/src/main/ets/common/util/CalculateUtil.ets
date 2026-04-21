@@ -108,8 +108,18 @@ class CalculateUtil {
         if (this.isSymbol(current)) {
           // Handle square root specially (unary operator)
           if (current === CommonConstants.SQRT) {
-            // For square root, we push it to outputQueue directly
-            outputQueue.push(current);
+            // 对于根号，需要等待后面的数字
+            // 检查下一个元素是否是数字
+            let next: string | undefined = expressions[0];
+            if (next !== undefined && !this.isSymbol(next)) {
+              // 如果下一个是数字，先处理数字，再处理根号
+              expressions.shift(); // 移除数字
+              outputQueue.push(next); // 先推入数字
+              outputQueue.push(current); // 再推入根号
+            } else {
+              // 否则直接推入根号
+              outputQueue.push(current);
+            }
           } else {
             // Processing binary operators (+, -, ×, ÷)
             while (outputStack.length > 0 && this.comparePriority(current, outputStack[outputStack.length - 1])) {
@@ -309,15 +319,35 @@ class CalculateUtil {
    * @return Square root result.
    */
   sqrt(operand: string): string {
+    console.info('[SQRT] operand = ' + operand);
     if (CheckEmptyUtil.isEmpty(operand)) {
       return 'NaN';
     }
     let num = Number(operand);
+    console.info('[SQRT] num = ' + num);
     if (num < 0) {
       return 'NaN'; // Negative numbers have no real square root
     }
     let result = Math.sqrt(num);
-    return this.numberToScientificNotation(result);
+    console.info('[SQRT] result = ' + result);
+    
+    // 检查是否为整数（考虑浮点精度问题）
+    let rounded = Math.round(result);
+    console.info('[SQRT] rounded = ' + rounded + ', diff = ' + Math.abs(result - rounded));
+    if (Math.abs(result - rounded) < 1e-10) {
+      console.info('[SQRT] return integer: ' + rounded.toString());
+      return rounded.toString();
+    }
+    
+    // 非整数结果保留四位小数
+    let fixedResult = result.toFixed(4);
+    console.info('[SQRT] fixedResult = ' + fixedResult);
+    // 如果结果过大或过小，使用科学计数法
+    if (Math.abs(result) >= 1e10 || (Math.abs(result) < 1e-6 && result !== 0)) {
+      return this.numberToScientificNotation(result);
+    }
+    console.info('[SQRT] return fixedResult: ' + fixedResult);
+    return fixedResult;
   }
 }
 
