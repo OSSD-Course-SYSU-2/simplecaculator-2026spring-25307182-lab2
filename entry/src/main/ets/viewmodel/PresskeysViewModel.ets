@@ -44,7 +44,12 @@ export class PressKeysBeanViewModel {
         new PressKeysBean(1, '19vp', '43vp', '.')
       ],
       [
-        new PressKeysBean(0, '30.48vp', '20vp', 'del', $r('app.media.ic_del')),
+        new PressKeysBean(0, '22vp', '20vp', 'sin'),
+        new PressKeysBean(0, '22vp', '20vp', 'cos'),
+        new PressKeysBean(0, '22vp', '20vp', 'tan'),
+        new PressKeysBean(0, '30.48vp', '20vp', 'del', $r('app.media.ic_del'))
+      ],
+      [
         new PressKeysBean(0, '24vp', '24vp', 'min', $r('app.media.ic_min')),
         new PressKeysBean(0, '32vp', '32vp', 'add', $r('app.media.ic_add')),
         new PressKeysBean(0, '32vp', '32vp', 'equ', $r('app.media.ic_equ'))

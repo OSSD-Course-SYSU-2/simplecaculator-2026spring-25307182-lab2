@@ -111,6 +111,21 @@ export class CommonConstants {
    * Square root symbol.
    */
   static readonly SQRT: string = '√'
+
+  /**
+   * Sine function symbol.
+   */
+  static readonly SIN: string = 'sin'
+
+  /**
+   * Cosine function symbol.
+   */
+  static readonly COS: string = 'cos'
+
+  /**
+   * Tangent function symbol.
+   */
+  static readonly TAN: string = 'tan'
 }
 
 /**
@@ -124,7 +139,10 @@ export enum Symbol {
   CLEAN = 'clean',
   DEL = 'del',
   EQU = 'equ',
-  SQRT = 'sqrt'
+  SQRT = 'sqrt',
+  SIN = 'sin',
+  COS = 'cos',
+  TAN = 'tan'
 }
 
 /**

@@ -1,0 +1,11 @@
+{
+  "float": [
+    {"name": "font_size_input", "value": "72fp"},
+    {"name": "font_size_text", "value": "36fp"},
+    {"name": "font_size_dot", "value": "48fp"},
+    {"name": "input_height", "value": "100vp"},
+    {"name": "key_width", "value": "85vp"},
+    {"name": "key_height", "value": "70vp"},
+    {"name": "equals_height", "value": "150vp"}
+  ]
+}

@@ -69,15 +69,19 @@ struct HomePage {
               ForEach(columnItem, (keyItem: PressKeysBean, keyItemIndex?: number) => {
                 Column() {
                   Column() {
-                    if (keyItem.flag === 0) {
-                      Image(keyItem.source !== undefined ? keyItem.source : '')
+                    if (keyItem.flag === 0 && keyItem.source !== undefined) {
+                      Image(keyItem.source)
                         .width(keyItem.width)
                         .height(keyItem.height)
                     } else {
                       Text(keyItem.value)
                         .fontSize(
                           (keyItem.value === CommonConstants.DOTS) ?
-                            $r('app.float.font_size_dot') : $r('app.float.font_size_text')
+                            $r('app.float.font_size_dot') : 
+                          (keyItem.value === CommonConstants.SIN || 
+                           keyItem.value === CommonConstants.COS || 
+                           keyItem.value === CommonConstants.TAN) ?
+                            14 : $r('app.float.font_size_text')
                         )
                         .width(keyItem.width)
                         .height(keyItem.height)
@@ -178,6 +182,12 @@ struct HomePage {
         // 不要立即计算结果，因为根号后面可能还有数字
         // 等待用户输入数字后再计算
         break;
+      case Symbol.SIN:
+      case Symbol.COS:
+      case Symbol.TAN:
+        // Handle trigonometric functions as special operators
+        this.inputOperators(len, value);
+        break;
       default:
         this.inputOperators(len, value);
         break;
@@ -202,14 +212,16 @@ struct HomePage {
     }
     if (!last) {
       this.expressions.push(value);
-    } else if (last === CommonConstants.SQRT) {
-      // 如果上一个是根号，推入新数字
+    } else if (last === CommonConstants.SQRT || last === CommonConstants.SIN || 
+               last === CommonConstants.COS || last === CommonConstants.TAN) {
+      // 如果上一个是根号或三角函数，推入新数字
       this.expressions.push(value);
     } else if (!secondLast) {
       this.expressions[len - 1] += value;
     } else if (secondLast && CalculateUtil.isSymbol(secondLast)) {
-      // 只有当last不是根号时才追加数字
-      if (last !== CommonConstants.SQRT) {
+      // 只有当last不是根号或三角函数时才追加数字
+      if (last !== CommonConstants.SQRT && last !== CommonConstants.SIN && 
+          last !== CommonConstants.COS && last !== CommonConstants.TAN) {
         this.expressions[len - 1] += value;
       }
     } else if (secondLast && !CalculateUtil.isSymbol(secondLast)) {
@@ -301,6 +313,20 @@ struct HomePage {
       return;
     }
     
+    // Handle trigonometric functions (unary operators)
+    if (value === Symbol.SIN || value === Symbol.COS || value === Symbol.TAN) {
+      let trigSymbol = this.getSymbol(value);
+      if (last && !CalculateUtil.isSymbol(last)) {
+        // 如果前面有数字，如 9sin30，需要添加乘号：9 × sin30
+        this.expressions.push(CommonConstants.MUL);
+        this.expressions.push(trigSymbol);
+      } else {
+        // 否则直接添加三角函数
+        this.expressions.push(trigSymbol);
+      }
+      return;
+    }
+    
     if (!last && (value === Symbol.MIN)) {
       this.expressions.push(this.getSymbol(value));
       return;
@@ -356,6 +382,15 @@ struct HomePage {
         break;
       case Symbol.SQRT:
         symbol = CommonConstants.SQRT;
+        break;
+      case Symbol.SIN:
+        symbol = CommonConstants.SIN;
+        break;
+      case Symbol.COS:
+        symbol = CommonConstants.COS;
+        break;
+      case Symbol.TAN:
+        symbol = CommonConstants.TAN;
         break;
       default:
         break;

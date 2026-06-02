@@ -27,7 +27,11 @@ class CalculateUtil {
     if (CheckEmptyUtil.isEmpty(value)) {
       return ;
     }
-    return (CommonConstants.OPERATORS.indexOf(value) !== -1 || value === CommonConstants.SQRT);
+    return (CommonConstants.OPERATORS.indexOf(value) !== -1 || 
+            value === CommonConstants.SQRT ||
+            value === CommonConstants.SIN ||
+            value === CommonConstants.COS ||
+            value === CommonConstants.TAN);
   }
 
   /**
@@ -43,6 +47,9 @@ class CalculateUtil {
     let result = 0;
     switch (value) {
       case CommonConstants.SQRT:
+      case CommonConstants.SIN:
+      case CommonConstants.COS:
+      case CommonConstants.TAN:
         result = Priority.HIGH + 1; // Higher than multiplication and division
         break;
       case SymbolicEnumeration.ADD:
@@ -97,6 +104,11 @@ class CalculateUtil {
         // For square root, we need to process it differently
         // We'll handle it during dealQueue
       }
+      // Handle trigonometric functions
+      if (item === CommonConstants.SIN || item === CommonConstants.COS || item === CommonConstants.TAN) {
+        // For trig functions, we need to process them differently
+        // We'll handle it during dealQueue
+      }
       // Whether the last digit is an operator.
       if ((index === len - 1) && this.isSymbol(item)) {
         expressions.pop();
@@ -118,6 +130,18 @@ class CalculateUtil {
               outputQueue.push(current); // 再推入根号
             } else {
               // 否则直接推入根号
+              outputQueue.push(current);
+            }
+          } else if (current === CommonConstants.SIN || current === CommonConstants.COS || current === CommonConstants.TAN) {
+            // Handle trigonometric functions (unary operators)
+            let next: string | undefined = expressions[0];
+            if (next !== undefined && !this.isSymbol(next)) {
+              // 如果下一个是数字，先处理数字，再处理三角函数
+              expressions.shift(); // 移除数字
+              outputQueue.push(next); // 先推入数字
+              outputQueue.push(current); // 再推入三角函数
+            } else {
+              // 否则直接推入三角函数
               outputQueue.push(current);
             }
           } else {
@@ -168,6 +192,13 @@ class CalculateUtil {
             if (operand !== undefined) {
               let sqrtResult: string = this.sqrt(operand);
               outputStack.push(sqrtResult);
+            }
+          } else if (current === CommonConstants.SIN || current === CommonConstants.COS || current === CommonConstants.TAN) {
+            // Handle trigonometric functions (unary operators)
+            let operand: string | undefined = outputStack.pop();
+            if (operand !== undefined) {
+              let trigResult: string = this.trigonometric(operand, current);
+              outputStack.push(trigResult);
             }
           } else {
             // Handle binary operators (+, -, ×, ÷)
@@ -347,6 +378,65 @@ class CalculateUtil {
       return this.numberToScientificNotation(result);
     }
     console.info('[SQRT] return fixedResult: ' + fixedResult);
+    return fixedResult;
+  }
+
+  /**
+   * Trigonometric function calculation (sin, cos, tan).
+   *
+   * @param operand The angle in degrees.
+   * @param func The trigonometric function (sin, cos, tan).
+   * @return Trigonometric function result.
+   */
+  trigonometric(operand: string, func: string): string {
+    console.info('[TRIG] operand = ' + operand + ', func = ' + func);
+    if (CheckEmptyUtil.isEmpty(operand)) {
+      return 'NaN';
+    }
+    let angle = Number(operand);
+    // Convert degrees to radians
+    let radians = angle * Math.PI / 180;
+    let result = 0;
+    
+    switch (func) {
+      case CommonConstants.SIN:
+        result = Math.sin(radians);
+        console.info('[TRIG] sin(' + angle + '°) = ' + result);
+        break;
+      case CommonConstants.COS:
+        result = Math.cos(radians);
+        console.info('[TRIG] cos(' + angle + '°) = ' + result);
+        break;
+      case CommonConstants.TAN:
+        // Check for undefined tan values (90°, 270°, etc.)
+        if (Math.abs(Math.cos(radians)) < 1e-10) {
+          console.info('[TRIG] tan(' + angle + '°) is undefined');
+          return 'NaN';
+        }
+        result = Math.tan(radians);
+        console.info('[TRIG] tan(' + angle + '°) = ' + result);
+        break;
+      default:
+        return 'NaN';
+    }
+    
+    // Check for special values
+    let rounded = Math.round(result);
+    if (Math.abs(result - rounded) < 1e-10) {
+      console.info('[TRIG] return integer: ' + rounded.toString());
+      return rounded.toString();
+    }
+    
+    // Format result to 6 decimal places
+    let fixedResult = result.toFixed(6);
+    console.info('[TRIG] fixedResult = ' + fixedResult);
+    
+    // Handle very large or very small numbers
+    if (Math.abs(result) >= 1e10 || (Math.abs(result) < 1e-6 && result !== 0)) {
+      return this.numberToScientificNotation(result);
+    }
+    
+    console.info('[TRIG] return fixedResult: ' + fixedResult);
     return fixedResult;
   }
 }

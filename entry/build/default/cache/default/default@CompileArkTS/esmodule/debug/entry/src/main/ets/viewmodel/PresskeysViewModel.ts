@@ -27,7 +27,12 @@ export class PressKeysBeanViewModel {
                 new PressKeysBean(1, '19vp', '43vp', '.')
             ],
             [
-                new PressKeysBean(0, '30.48vp', '20vp', 'del', { "id": 16777249, "type": 20000, params: [], "bundleName": "com.example.simplecalculator", "moduleName": "entry" }),
+                new PressKeysBean(0, '22vp', '20vp', 'sin'),
+                new PressKeysBean(0, '22vp', '20vp', 'cos'),
+                new PressKeysBean(0, '22vp', '20vp', 'tan'),
+                new PressKeysBean(0, '30.48vp', '20vp', 'del', { "id": 16777249, "type": 20000, params: [], "bundleName": "com.example.simplecalculator", "moduleName": "entry" })
+            ],
+            [
                 new PressKeysBean(0, '24vp', '24vp', 'min', { "id": 16777252, "type": 20000, params: [], "bundleName": "com.example.simplecalculator", "moduleName": "entry" }),
                 new PressKeysBean(0, '32vp', '32vp', 'add', { "id": 16777247, "type": 20000, params: [], "bundleName": "com.example.simplecalculator", "moduleName": "entry" }),
                 new PressKeysBean(0, '32vp', '32vp', 'equ', { "id": 16777251, "type": 20000, params: [], "bundleName": "com.example.simplecalculator", "moduleName": "entry" })
